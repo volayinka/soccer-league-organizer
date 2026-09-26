@@ -1,3 +1,4 @@
+//This is a system/data file that holds facts about a team. This file does not do anything on its own.
 // This is a stand-alone, template file used by LeagueManager.java to create Team objects
 
  package com.teamtreehouse.model;
