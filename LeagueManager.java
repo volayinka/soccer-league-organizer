@@ -43,6 +43,7 @@ public class LeagueManager {
     menu.put("removePlayer", "Remove a player from a team");
     menu.put("roster", "Print a team roster");
     menu.put("heightreport", "View a team height report");
+    menu.put("balancereport", "View the league balance report");
 
 
     // Creates an empty List to hold every Team object that gets created while the program runs.
@@ -118,6 +119,9 @@ public class LeagueManager {
               break;
             }
             printHeightReport(heightTeam);
+            break;
+          case "balancereport":
+            printBalanceReport(teams);
             break;
           case "quit":
             System.out.println("Goodbye!");
@@ -261,6 +265,29 @@ public class LeagueManager {
     }
     for (Map.Entry<String, Integer> entry : ranges.entrySet()) {
       System.out.printf("%s inches: %d player(s)%n", entry.getKey(), entry.getValue());
+    }
+    System.out.println();
+  }
+  // For every team, counts experienced vs. inexperienced players and prints the totals.
+  private static void printBalanceReport(List<Team> teams) {
+    System.out.println();
+    if (teams.isEmpty()) {
+      System.out.println("There are no teams yet.");
+      return;
+    }
+    List<Team> sortedTeams = new ArrayList<>(teams);
+    sortedTeams.sort((a, b) -> a.getTeamName().compareToIgnoreCase(b.getTeamName()));
+    for (Team t : sortedTeams) {
+      int experienced = 0;
+      int inexperienced = 0;
+      for (Player p : t.getPlayers()) {
+        if (p.isPreviousExperience()) {
+          experienced++;
+        } else {
+          inexperienced++;
+        }
+      }
+      System.out.printf("%s - experienced: %d, inexperienced: %d%n", t.getTeamName(), experienced, inexperienced);
     }
     System.out.println();
   }
