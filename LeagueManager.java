@@ -39,6 +39,7 @@ public class LeagueManager {
     menu.put("addPlayer", "Add a player to a team");
     menu.put("quit", "Exit the program");
     menu.put("removePlayer", "Remove a player from a team");
+    menu.put("roster", "Print a team roster");
 
     // Creates an empty List to hold every Team object that gets created while the program runs.
     List<Team> teams = new ArrayList<>();
@@ -100,6 +101,13 @@ public class LeagueManager {
             System.out.printf("%s %s removed from %s.%n%n",
                     toRemove.getFirstName(), toRemove.getLastName(), fromTeam.getTeamName());
             break;
+          case "roster":
+            Team rosterTeam = promptForTeam(teams, reader);
+            if (rosterTeam == null) {
+              break;
+            }
+            printRoster(rosterTeam);
+            break;
           case "quit":
             System.out.println("Goodbye!");
             break;
@@ -112,6 +120,7 @@ public class LeagueManager {
       }
     } while (!choice.equals("quit"));
   }
+
   // Shows the players on one team in alphabetical order and returns the one the organizer picks. Returns null if the team is empty or the pick isn't valid.
   private static Player promptForTeamPlayer(Team team, BufferedReader reader) throws IOException {
     if (team.getPlayers().isEmpty()) {
@@ -139,6 +148,7 @@ public class LeagueManager {
       return null;
     }
   }
+
   // Sorts the teams alphabetically by name, prints them as a numbered list, and returns the one the organizer picks. Returns null if there are no teams or the pick isn't valid.
   private static Team promptForTeam(List<Team> teams, BufferedReader reader) throws IOException {
     // Guards against the empty list that caused the crash.
@@ -203,6 +213,23 @@ public class LeagueManager {
       System.out.println("Please type a number.");
       return null;
     }
+  }
+
+  // Prints every player on one team, alphabetically, with their stats.
+  private static void printRoster(Team team) {
+    System.out.printf("%n%s roster (coach: %s)%n", team.getTeamName(), team.getCoachName());
+    if (team.getPlayers().isEmpty()) {
+      System.out.println("No players yet.");
+      return;
+    }
+    List<Player> roster = new ArrayList<>(team.getPlayers());
+    Collections.sort(roster);
+    for (Player p : roster) {
+      System.out.printf("%s %s - %d inches - experienced: %s%n",
+              p.getFirstName(), p.getLastName(), p.getHeightInInches(),
+              p.isPreviousExperience() ? "yes" : "no");
+    }
+    System.out.println();
   }
 
 }
