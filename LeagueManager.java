@@ -19,6 +19,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.Collections;
+
 public class LeagueManager {
 
   public static void main(String[] args) {
@@ -66,6 +68,24 @@ public class LeagueManager {
             teams.add(team);
             System.out.printf("%s created!%n%n", teamName);
             break;
+          case "addplayer":
+            Team chosen = promptForTeam(teams, reader);
+            if (chosen == null) {
+              break;
+            }
+            // Enforces the 11-player maximum before showing any players.
+            if (chosen.getPlayers().size() >= 11) {
+              System.out.printf("%s is full (11 players).%n%n", chosen.getTeamName());
+              break;
+            }
+            Player chosenPlayer = promptForPlayer(players, teams, reader);
+            if (chosenPlayer == null) {
+              break;
+            }
+            chosen.getPlayers().add(chosenPlayer);
+            System.out.printf("%s %s added to %s!%n%n",
+                    chosenPlayer.getFirstName(), chosenPlayer.getLastName(), chosen.getTeamName());
+            break;
           case "quit":
             System.out.println("Goodbye!");
             break;
@@ -77,6 +97,72 @@ public class LeagueManager {
         ioe.printStackTrace();
       }
     } while (!choice.equals("quit"));
+  }
+
+  // Sorts the teams alphabetically by name, prints them as a numbered list, and returns the one the organizer picks. Returns null if there are no teams or the pick isn't valid.
+  private static Team promptForTeam(List<Team> teams, BufferedReader reader) throws IOException {
+    // Guards against the empty list that caused the crash.
+    if (teams.isEmpty()) {
+      System.out.println("There are no teams yet. Create a team first.");
+      return null;
+    }
+    List<Team> sortedTeams = new ArrayList<>(teams);
+    sortedTeams.sort((a, b) -> a.getTeamName().compareToIgnoreCase(b.getTeamName()));
+    for (int i = 0; i < sortedTeams.size(); i++) {
+      System.out.printf("%d.) %s (coach: %s)%n", i + 1, sortedTeams.get(i).getTeamName(), sortedTeams.get(i).getCoachName());
+    }
+    System.out.print("Pick a team number:  ");
+    try {
+      int number = Integer.parseInt(reader.readLine().trim());
+      if (number < 1 || number > sortedTeams.size()) {
+        System.out.println("That number isn't on the list.");
+        return null;
+      }
+      return sortedTeams.get(number - 1);
+    } catch (NumberFormatException nfe) {
+      System.out.println("Please type a number.");
+      return null;
+    }
+  }
+
+  // Builds an alphabetical numbered list of players not yet on any team, and returns the one the organizer picks. Returns null if none are available or the pick isn't valid.
+  private static Player promptForPlayer(Player[] players, List<Team> teams, BufferedReader reader) throws IOException {
+    List<Player> available = new ArrayList<>();
+    for (Player player : players) {
+      boolean taken = false;
+      for (Team team : teams) {
+        if (team.getPlayers().contains(player)) {
+          taken = true;
+        }
+      }
+      if (!taken) {
+        available.add(player);
+      }
+    }
+    if (available.isEmpty()) {
+      System.out.println("Every player is already on a team.");
+      return null;
+    }
+    // Uses the compareTo you finished in Player.java (last name, then first name).
+    Collections.sort(available);
+    for (int i = 0; i < available.size(); i++) {
+      Player p = available.get(i);
+      System.out.printf("%d.) %s %s (%d inches, experienced: %s)%n",
+              i + 1, p.getFirstName(), p.getLastName(), p.getHeightInInches(),
+              p.isPreviousExperience() ? "yes" : "no");
+    }
+    System.out.print("Pick a player number:  ");
+    try {
+      int number = Integer.parseInt(reader.readLine().trim());
+      if (number < 1 || number > available.size()) {
+        System.out.println("That number isn't on the list.");
+        return null;
+      }
+      return available.get(number - 1);
+    } catch (NumberFormatException nfe) {
+      System.out.println("Please type a number.");
+      return null;
+    }
   }
 
 }
