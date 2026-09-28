@@ -21,6 +21,8 @@ import java.util.List;
 
 import java.util.Collections;
 
+import java.util.TreeMap;
+
 public class LeagueManager {
 
   public static void main(String[] args) {
@@ -40,6 +42,8 @@ public class LeagueManager {
     menu.put("quit", "Exit the program");
     menu.put("removePlayer", "Remove a player from a team");
     menu.put("roster", "Print a team roster");
+    menu.put("heightreport", "View a team height report");
+
 
     // Creates an empty List to hold every Team object that gets created while the program runs.
     List<Team> teams = new ArrayList<>();
@@ -107,6 +111,13 @@ public class LeagueManager {
               break;
             }
             printRoster(rosterTeam);
+            break;
+          case "heightreport":
+            Team heightTeam = promptForTeam(teams, reader);
+            if (heightTeam == null) {
+              break;
+            }
+            printHeightReport(heightTeam);
             break;
           case "quit":
             System.out.println("Goodbye!");
@@ -228,6 +239,28 @@ public class LeagueManager {
       System.out.printf("%s %s - %d inches - experienced: %s%n",
               p.getFirstName(), p.getLastName(), p.getHeightInInches(),
               p.isPreviousExperience() ? "yes" : "no");
+    }
+
+    System.out.println();
+  }
+  // Groups a team's players into 5-inch height ranges and prints a count for each range.
+  private static void printHeightReport(Team team) {
+    System.out.printf("%n%s height report%n", team.getTeamName());
+    if (team.getPlayers().isEmpty()) {
+      System.out.println("No players yet.");
+      return;
+    }
+    // Each range's label maps to how many players fall in it.
+    Map<String, Integer> ranges = new TreeMap<>();
+    for (Player p : team.getPlayers()) {
+      int height = p.getHeightInInches();
+      // Rounds down to the nearest 5, so 42 -> "40-44", 47 -> "45-49".
+      int rangeStart = (height / 5) * 5;
+      String label = rangeStart + "-" + (rangeStart + 4);
+      ranges.put(label, ranges.getOrDefault(label, 0) + 1);
+    }
+    for (Map.Entry<String, Integer> entry : ranges.entrySet()) {
+      System.out.printf("%s inches: %d player(s)%n", entry.getKey(), entry.getValue());
     }
     System.out.println();
   }
