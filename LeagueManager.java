@@ -38,6 +38,7 @@ public class LeagueManager {
     menu.put("createTeam", "Create a new team");
     menu.put("addPlayer", "Add a player to a team");
     menu.put("quit", "Exit the program");
+    menu.put("removePlayer", "Remove a player from a team");
 
     // Creates an empty List to hold every Team object that gets created while the program runs.
     List<Team> teams = new ArrayList<>();
@@ -86,6 +87,19 @@ public class LeagueManager {
             System.out.printf("%s %s added to %s!%n%n",
                     chosenPlayer.getFirstName(), chosenPlayer.getLastName(), chosen.getTeamName());
             break;
+          case "removeplayer":
+            Team fromTeam = promptForTeam(teams, reader);
+            if (fromTeam == null) {
+              break;
+            }
+            Player toRemove = promptForTeamPlayer(fromTeam, reader);
+            if (toRemove == null) {
+              break;
+            }
+            fromTeam.getPlayers().remove(toRemove);
+            System.out.printf("%s %s removed from %s.%n%n",
+                    toRemove.getFirstName(), toRemove.getLastName(), fromTeam.getTeamName());
+            break;
           case "quit":
             System.out.println("Goodbye!");
             break;
@@ -98,7 +112,33 @@ public class LeagueManager {
       }
     } while (!choice.equals("quit"));
   }
-
+  // Shows the players on one team in alphabetical order and returns the one the organizer picks. Returns null if the team is empty or the pick isn't valid.
+  private static Player promptForTeamPlayer(Team team, BufferedReader reader) throws IOException {
+    if (team.getPlayers().isEmpty()) {
+      System.out.println("That team has no players yet.");
+      return null;
+    }
+    List<Player> onTeam = new ArrayList<>(team.getPlayers());
+    Collections.sort(onTeam);
+    for (int i = 0; i < onTeam.size(); i++) {
+      Player p = onTeam.get(i);
+      System.out.printf("%d.) %s %s (%d inches, experienced: %s)%n",
+              i + 1, p.getFirstName(), p.getLastName(), p.getHeightInInches(),
+              p.isPreviousExperience() ? "yes" : "no");
+    }
+    System.out.print("Pick a player number to remove:  ");
+    try {
+      int number = Integer.parseInt(reader.readLine().trim());
+      if (number < 1 || number > onTeam.size()) {
+        System.out.println("That number isn't on the list.");
+        return null;
+      }
+      return onTeam.get(number - 1);
+    } catch (NumberFormatException nfe) {
+      System.out.println("Please type a number.");
+      return null;
+    }
+  }
   // Sorts the teams alphabetically by name, prints them as a numbered list, and returns the one the organizer picks. Returns null if there are no teams or the pick isn't valid.
   private static Team promptForTeam(List<Team> teams, BufferedReader reader) throws IOException {
     // Guards against the empty list that caused the crash.
