@@ -1,7 +1,6 @@
 //This is a logic/behavior file where the program's action occurs. This file is the engine that runs the application and manipulates the data.
 // This file is dependent on the objects created in the Team.java to perform.
 
-// These imports tell Java to go look inside the com.teamtreehouse.model package (folder) and bring in the Player, Players and Team classes so I can reference them in this file.
 
 import com.teamtreehouse.model.Player;
 import com.teamtreehouse.model.Players;
@@ -11,10 +10,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
+import java.util.LinkedHashMap;
 
-// These imports bring in the HashMap class and the Map interface. HashMap is an implementation of the Map interface. These imports both live in Java's tool kit.
-//These imports bring in tools for reading input from the console (the keyboard). BufferedReader and InputStreamReader help convert and read what someone types, and IOException is an error type Java requires me to handle whenever I'm reading input, since something could go wrong.
-// These imports bring in ArrayList and the List interface, used to hold all the teams.
 
 public class LeagueManager {
 
@@ -241,24 +238,41 @@ public class LeagueManager {
         System.out.println();
     }
 
-    // Groups a team's players into 5-inch height ranges and prints a count for each range.
+    // Groups a team's players into the required height ranges and lists each player's name under their range.
     private static void printHeightReport(Team team) {
         System.out.printf("%n%s height report%n", team.getTeamName());
         if (team.getPlayers().isEmpty()) {
             System.out.println("No players yet.");
             return;
         }
-        // Each range's label maps to how many players fall in it.
-        Map<String, Integer> ranges = new TreeMap<>();
+        // Each range's label maps to the list of players whose height falls in it.
+        Map<String, List<Player>> ranges = new LinkedHashMap<>();
+        ranges.put("35-40 inches", new ArrayList<>());
+        ranges.put("41-46 inches", new ArrayList<>());
+        ranges.put("47-50 inches", new ArrayList<>());
+
         for (Player p : team.getPlayers()) {
             int height = p.getHeightInInches();
-            // Rounds down to the nearest 5, so 42 -> "40-44", 47 -> "45-49".
-            int rangeStart = (height / 5) * 5;
-            String label = rangeStart + "-" + (rangeStart + 4);
-            ranges.put(label, ranges.getOrDefault(label, 0) + 1);
+            if (height >= 35 && height <= 40) {
+                ranges.get("35-40 inches").add(p);
+            } else if (height >= 41 && height <= 46) {
+                ranges.get("41-46 inches").add(p);
+            } else if (height >= 47 && height <= 50) {
+                ranges.get("47-50 inches").add(p);
+            }
         }
-        for (Map.Entry<String, Integer> entry : ranges.entrySet()) {
-            System.out.printf("%s inches: %d player(s)%n", entry.getKey(), entry.getValue());
+
+        for (Map.Entry<String, List<Player>> entry : ranges.entrySet()) {
+            List<Player> playersInRange = entry.getValue();
+            Collections.sort(playersInRange);
+            StringBuilder names = new StringBuilder();
+            for (int i = 0; i < playersInRange.size(); i++) {
+                if (i > 0) {
+                    names.append(", ");
+                }
+                names.append(playersInRange.get(i).getFirstName()).append(" ").append(playersInRange.get(i).getLastName());
+            }
+            System.out.printf("%s: %s%n", entry.getKey(), names.toString());
         }
         System.out.println();
     }
